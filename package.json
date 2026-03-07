@@ -1,0 +1,27 @@
+{
+  "name": "projekt04",
+  "version": "1.0.0",
+  "description": "A movie management application that allows users to add their favorite movies.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "ejs": "^3.1.10",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.7"
+  },
+  "keywords": [
+    "movies",
+    "management",
+    "express",
+    "ejs"
+  ],
+  "author": "Your Name",
+  "license": "ISC"
+}
