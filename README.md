@@ -1,6 +1,6 @@
 # Przepisy (Express + SQLite)
 
-Prosta aplikacja Express do przechowywania przepisów w bazie SQLite.
+Prosta aplikacja Express do przechowywania filmów w bazie SQLite.
 
 ## Wymagania
 - Node.js 18+  

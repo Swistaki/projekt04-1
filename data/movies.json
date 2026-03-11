@@ -1,0 +1,92 @@
+{
+  "movies": [
+    {
+      "id": 1,
+      "title": "Inception",
+      "director": "Christopher Nolan",
+      "year": 2010,
+      "genre": "Sci-Fi",
+      "rating": 10,
+      "userId": null,
+      "hiddenFor": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Blade Runner 2049",
+      "director": "Denis Villeneuve",
+      "year": 2017,
+      "genre": "Sci-Fi",
+      "rating": 8,
+      "userId": null,
+      "hiddenFor": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 3,
+      "title": "The Shawshank Redemption",
+      "director": "Frank Darabont",
+      "year": 1994,
+      "genre": "Drama",
+      "rating": 9.3,
+      "userId": null,
+      "hiddenFor": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Forrest Gump",
+      "director": "Robert Zemeckis",
+      "year": 1994,
+      "genre": "Drama",
+      "rating": 8.8,
+      "userId": null,
+      "hiddenFor": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Pulp Fiction",
+      "director": "Quentin Tarantino",
+      "year": 1994,
+      "genre": "Crime",
+      "rating": 8.9,
+      "userId": null,
+      "hiddenFor": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 6,
+      "title": "The Dark Knight",
+      "director": "Christopher Nolan",
+      "year": 2008,
+      "genre": "Action",
+      "rating": 9,
+      "userId": null,
+      "hiddenFor": [
+        1,
+        4
+      ]
+    },
+    {
+      "id": 8,
+      "title": "eeee",
+      "director": "eeee",
+      "year": 2020,
+      "genre": "eeee",
+      "rating": 3,
+      "userId": 3
+    }
+  ],
+  "nextId": 10
+}

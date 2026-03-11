@@ -91,19 +91,9 @@ form button:hover {
 }
 
 /* Button styles */
-.btn-cancel {
-    background-color: #6c757d;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 4px;
-    display: inline-block;
-    margin-top: 10px;
-}
 
-.btn-cancel:hover {
-    background-color: #5a6268;
-    text-decoration: none;
-}
+
+
 
 .btn-delete {
     background-color: #dc3545;

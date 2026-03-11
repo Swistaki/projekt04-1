@@ -7,3 +7,15 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+    <nav>
+        <% if (user) { %>
+            <span>Logged in as: <%= user.username %></span>
+            <form action="/logout" method="POST" style="display:inline;">
+                <button type="submit">Logout</button>
+            </form>
+        <% } else { %>
+            <a href="/login">Login</a>
+            <a href="/register">Register</a>
+        <% } %>
+    </nav>
+    <main>

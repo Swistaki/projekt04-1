@@ -1,0 +1,43 @@
+[
+  {
+    "id": 1,
+    "username": "abcd",
+    "password": "$2b$10$vmFP8qYFTzwMYNd91.D7D.m1/RUSdWeJ4lnYdigPM3EM2yHuYhfSm",
+    "createdAt": "2026-03-11T14:43:03.087Z",
+    "hasSeenSampleMovies": true
+  },
+  {
+    "id": 2,
+    "username": "dddd",
+    "password": "$2b$10$6xeKOz6TXYYo0iXAqfZIXOai7o8jxYFk5Uu7RXfdk4If6wz6Ndpay",
+    "createdAt": "2026-03-11T14:44:22.718Z"
+  },
+  {
+    "id": 3,
+    "username": "eeee",
+    "password": "$2b$10$YqES6xUqEwKWEVp7lEXRjuqJzadrS7SVDhxlHE/cmbPXmazpvs0py",
+    "createdAt": "2026-03-11T15:05:06.132Z",
+    "hasSeenSampleMovies": true
+  },
+  {
+    "id": 4,
+    "username": "rrrr",
+    "password": "$2b$10$iyNspvwiJm5qZjcMQUkgB.7cA5rEmrKKkgAWOiBI8IPi7p8nVkGFW",
+    "createdAt": "2026-03-11T15:12:56.447Z",
+    "hasSeenSampleMovies": true
+  },
+  {
+    "id": 5,
+    "username": "tttt",
+    "password": "$2b$10$eagZdk7BA66kKCDCoOGxQe7X5sJ6ubHRmjg3fTuTn/mDkCSV.DGh.",
+    "createdAt": "2026-03-11T15:18:50.209Z",
+    "hasSeenSampleMovies": false
+  },
+  {
+    "id": 6,
+    "username": "qqqq",
+    "password": "$2b$10$IDcGiggJCk/.gK.1tc1U4.sNeAfCYd/WDEJjgqxO/dWOkjF04AcdS",
+    "createdAt": "2026-03-11T15:23:21.277Z",
+    "hasSeenSampleMovies": false
+  }
+]
