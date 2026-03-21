@@ -42,7 +42,7 @@
                 <input type="number" id="rating" name="rating" min="0" max="10" step="0.1" value="<%= movie.rating || '' %>" placeholder="0-10">
             </div>
 
-            <button type="submit">Save Changes</button>
+            <button type="submit" id="add-movie-btn">Save Changes</button>
             <a href="/movies/<%= movie.id %>" class="btn-cancel">Cancel</a>
             <a href="/" class="btn-back">Back to Home</a>
         </form>

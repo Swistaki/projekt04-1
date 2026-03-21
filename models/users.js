@@ -1,65 +1,31 @@
 import bcrypt from "bcryptjs";
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import db_ops from "./database.js";
 
 const SALT_ROUNDS = 10;
 
-const DATA_FILE = path.join(__dirname, "..", "data", "users.json");
-
-function ensureDataDir() {
-  const dataDir = path.join(__dirname, "..", "data");
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-}
-
-function loadUsers() {
-  ensureDataDir();
-  if (!fs.existsSync(DATA_FILE)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(DATA_FILE, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-function saveUsers(users) {
-  ensureDataDir();
-  fs.writeFileSync(DATA_FILE, JSON.stringify(users, null, 2));
-}
-
-const users = loadUsers();
-
-function getNextId() {
-  if (users.length === 0) return 1;
-  return Math.max(...users.map((u) => u.id)) + 1;
+function parseUser(row) {
+  return {
+    ...row,
+    hasSeenSampleMovies: Boolean(row.hasSeenSampleMovies),
+  };
 }
 
 function getAll() {
-  return users;
+  return db_ops.get_all_users.all().map(parseUser);
 }
 
 function getByUsername(username) {
-  return users.find((u) => u.username === username);
+  const row = db_ops.get_user_by_username.get(username);
+  return row ? parseUser(row) : null;
 }
 
 function getById(id) {
-  return users.find((u) => u.id === id);
+  const row = db_ops.get_user_by_id.get(id);
+  return row ? parseUser(row) : null;
 }
 
 function markSeenSampleMovies(userId) {
-  const user = users.find((u) => u.id === userId);
-  if (user) {
-    user.hasSeenSampleMovies = true;
-    saveUsers(users);
-  }
+  db_ops.update_user_seen_samples.run(userId);
 }
 
 async function create(userData) {
@@ -84,17 +50,8 @@ async function create(userData) {
 
   const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
 
-  const newUser = {
-    id: getNextId(),
-    username,
-    password: hashedPassword,
-    createdAt: new Date().toISOString(),
-    hasSeenSampleMovies: false,
-  };
-
-  users.push(newUser);
-  saveUsers(users);
-  return { user: newUser };
+  const result = db_ops.insert_user.run(username, hashedPassword, new Date().toISOString());
+  return { user: parseUser(result) };
 }
 
 async function validatePassword(username, password) {

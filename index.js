@@ -56,7 +56,7 @@ app.get("/movies/seed", requireAuth, (req, res) => {
 app.get("/movies", requireAuth, (req, res) => {
   let allMovies = movies.getAllForUser(req.session.user.id);
   const user = users.getById(req.session.user.id);
-  if (!user.hasSeenSampleMovies && allMovies.length === 0) {
+  if (!user?.hasSeenSampleMovies && allMovies.length === 0) {
     movies.seedData();
     allMovies = movies.getAllForUser(req.session.user.id);
     users.markSeenSampleMovies(req.session.user.id);
@@ -266,8 +266,7 @@ app.post("/login", async (req, res) => {
   res.redirect("/movies");
 });
 
-// Handle logout
-app.post("/logout", (req, res) => {
+app.get("/logout", (req, res) => {
   req.session.destroy(() => {
     res.redirect("/login");
   });

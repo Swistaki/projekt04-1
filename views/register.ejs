@@ -2,7 +2,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <main>
+    <main id="f">
         <h1><%= title %></h1>
         
         <% if (error) { %>
@@ -18,7 +18,7 @@
                 <label for="password">Password:</label>
                 <input type="password" id="password" name="password" required>
             </div>
-            <button type="submit">Register</button>
+            <button type="submit" id="add-movie-btn">Register</button>
         </form>
         
         <p>Already have an account? <a href="/login">Login here</a></p>

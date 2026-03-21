@@ -8,14 +8,19 @@
 </head>
 <body>
     <nav>
+        <div class="nav-brand">
+            <a href="/">Favorite Movies</a>
+        </div>
         <% if (user) { %>
-            <span>Logged in as: <%= user.username %></span>
-            <form action="/logout" method="POST" style="display:inline;">
-                <button type="submit">Logout</button>
-            </form>
+            <div class="nav-user">
+                <span>Logged in as: <%= user.username %></span>
+                <a href="/logout" class="btn btn-small">Logout</a>
+            </div>
         <% } else { %>
-            <a href="/login">Login</a>
-            <a href="/register">Register</a>
+            <div class="nav-auth">
+                <a href="/login" class="btn btn-small">Login</a>
+                <a href="/register" class="btn btn-small btn-accent">Register</a>
+            </div>
         <% } %>
-    </nav>
+    </nav> 
     <main>
