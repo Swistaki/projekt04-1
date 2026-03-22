@@ -5,22 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Favorite Movies</title>
     <link rel="stylesheet" href="/css/style.css">
+
 </head>
 <body>
     <nav>
         <div class="nav-brand">
             <a href="/">Favorite Movies</a>
+            <% if (typeof isAdmin !== 'undefined' && isAdmin) { %>
+                <a href="/admin" class="btn btn-small">Admin</a>
+            <% } %>
         </div>
-        <% if (user) { %>
-            <div class="nav-user">
-                <span>Logged in as: <%= user.username %></span>
-                <a href="/logout" class="btn btn-small">Logout</a>
-            </div>
-        <% } else { %>
-            <div class="nav-auth">
-                <a href="/login" class="btn btn-small">Login</a>
-                <a href="/register" class="btn btn-small btn-accent">Register</a>
-            </div>
-        <% } %>
+        <div class="nav-right">
+            <% if (user) { %>
+                <div class="nav-user">
+                    <span>Logged in as: <%= user.username %></span>
+                    <a href="/logout" class="btn btn-small">Logout</a>
+                </div>
+            <% } else { %>
+                <div class="nav-auth">
+                    <a href="/login" class="btn btn-small">Login</a>
+                    <a href="/register" class="btn btn-small btn-accent">Register</a>
+                </div>
+            <% } %>
+        </div>
     </nav> 
     <main>

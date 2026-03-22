@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head.partial.ejs') %>
+    <title><%= title %></title>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <h2>All Users</h2>
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Movies</th>
+                    <th>Joined</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% users.forEach(function(u) { %>
+                    <tr>
+                        <td><%= u.id %></td>
+                        <td><%= u.username %><% if (u.isAdmin) { %> (Admin)<% } %></td>
+                        <td><%= u.movieCount %></td>
+                        <td><%= new Date(u.createdAt).toLocaleDateString() %></td>
+                        <td>
+                            <a href="/admin/users/<%= u.id %>/edit" class="btn btn-edit btn-small">Edit</a>
+                            <a href="/admin/users/<%= u.id %>/movies" class="btn btn-secondary btn-small">Movies</a>
+                        </td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+    <%- include('../partials/foot.partial.ejs') %>
+</body>
+</html>

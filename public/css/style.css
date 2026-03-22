@@ -13,6 +13,7 @@
     --text-primary: #ffffff;
     --text-secondary: #a0a0a0;
     --input-bg: rgba(255, 255, 255, 0.08);
+    --shadow: rgba(0, 0, 0, 0.3);
 }
 
 body {
@@ -38,10 +39,92 @@ nav {
 .nav-brand a {
     font-size: 1.3rem;
     font-weight: 700;
-    background: linear-gradient(90deg, #fff, var(--accent));
+    background: linear-gradient(90deg, var(--text-primary), var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+.nav-brand {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2rem 0;
+    background: var(--card-bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.users-table th,
+.users-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--card-border);
+}
+
+.users-table th {
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--accent);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.users-table tr:last-child td {
+    border-bottom: none;
+}
+
+.users-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.movie-edit-form {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    max-width: none;
+    gap: 0.75rem;
+}
+
+.movie-edit-form .form-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.movie-edit-form label {
+    min-width: 80px;
+    margin: 0;
+}
+
+.movie-edit-form input {
+    flex: 1;
+    padding: 0.75rem;
+}
+
+.inline-form {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.inline-form button {
+    margin: 0;
 }
 
 .nav-auth {
@@ -79,7 +162,7 @@ nav a {
 
 nav button {
     color: var(--text-primary);
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--card-bg);
     border: 1px solid var(--card-border);
     padding: 0.4rem 0.8rem;
     border-radius: 8px;

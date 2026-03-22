@@ -50,7 +50,7 @@ function seedData() {
 }
 
 export function add(movie_data, userId) {
-  const result = db_ops.insert_movie.run(
+  db_ops.insert_movie.run(
     movie_data.title,
     movie_data.director,
     movie_data.year,
@@ -58,7 +58,8 @@ export function add(movie_data, userId) {
     movie_data.rating || null,
     userId
   );
-  return parseMovie(result);
+  const lastId = db_ops.get_last_insert_id.get();
+  return getById(lastId.id);
 }
 
 export function getAll() {
@@ -78,11 +79,13 @@ export function getById(id_param) {
 }
 
 export function update(id_param, movie_data, userId) {
+  console.log("update called:", { id_param, movie_data, userId });
   const movie = getById(id_param);
+  console.log("movie found:", movie);
   if (!movie) return null;
 
   if (movie.userId === null) {
-    const result = db_ops.insert_movie.run(
+    db_ops.insert_movie.run(
       movie_data.title,
       movie_data.director,
       movie_data.year,
@@ -90,7 +93,17 @@ export function update(id_param, movie_data, userId) {
       movie_data.rating || null,
       userId
     );
-    return parseMovie(result);
+    const lastId = db_ops.get_last_insert_id.get();
+    console.log("lastId result:", JSON.stringify(lastId));
+    console.log("lastId.id:", lastId && lastId.id);
+    const newId = lastId && lastId.id;
+    if (!newId) {
+      console.log("ERROR: Could not get new movie id");
+      return null;
+    }
+    const updated = getById(newId);
+    console.log("updated:", updated);
+    return updated;
   } else if (movie.userId !== userId) {
     return null;
   } else {
@@ -103,11 +116,12 @@ export function update(id_param, movie_data, userId) {
       movie.userId,
       id_param
     );
+    console.log("update result:", result);
     return result ? parseMovie(result) : null;
   }
 }
 
-export function deleteMovie(id_param, userId) {
+export function deleteMovie(id_param, userId, isAdmin = false) {
   const movie = getById(id_param);
   if (!movie) return false;
 
@@ -117,7 +131,7 @@ export function deleteMovie(id_param, userId) {
       hiddenFor.push(userId);
     }
     db_ops.update_movie_hidden.run(JSON.stringify(hiddenFor), id_param);
-  } else if (movie.userId !== userId) {
+  } else if (!isAdmin && movie.userId !== userId) {
     return false;
   } else {
     db_ops.delete_movie.run(id_param);

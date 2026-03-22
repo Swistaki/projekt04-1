@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head.partial.ejs') %>
+    <title><%= title %></title>
+</head>
+<body>
+    <div class="container">
+        <h1><%= title %></h1>
+        <a href="/admin" class="btn btn-secondary">Back to Dashboard</a>
+
+        <br><br>
+        
+        <% if (errors && errors.length > 0) { %>
+            <ul id="errors">
+                <% errors.forEach(function(error) { %>
+                    <li><%= error %></li>
+                <% }) %>
+            </ul>
+        <% } %>
+
+        <% if (movies && movies.length > 0) { %>
+            <ul class="movie-list">
+                <% movies.forEach(function(movie) { %>
+                    <li class="movie-card">
+                        <h3><%= movie.title %></h3>
+                        <form method="post" action="/admin/users/<%= user.id %>/movies/<%= movie.id %>/edit" class="movie-edit-form">
+                            <div class="form-row">
+                                <label for="title_<%= movie.id %>">Title:</label>
+                                <input type="text" id="title_<%= movie.id %>" name="title" value="<%= movie.title %>" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="director_<%= movie.id %>">Director:</label>
+                                <input type="text" id="director_<%= movie.id %>" name="director" value="<%= movie.director %>" required>
+                            </div>
+                            <div class="form-row">
+                                <label for="year_<%= movie.id %>">Year:</label>
+                                <input type="number" id="year_<%= movie.id %>" name="year" value="<%= movie.year || '' %>">
+                            </div>
+                            <div class="form-row">
+                                <label for="genre_<%= movie.id %>">Genre:</label>
+                                <input type="text" id="genre_<%= movie.id %>" name="genre" value="<%= movie.genre || '' %>">
+                            </div>
+                            <div class="form-row">
+                                <label for="rating_<%= movie.id %>">Rating (0-10):</label>
+                                <input type="number" id="rating_<%= movie.id %>" name="rating" min="0" max="10" step="0.1" value="<%= movie.rating || '' %>">
+                            </div>
+                            <div class="movie-actions">
+                                <button type="submit" class="btn btn-edit btn-small">Save</button>
+                            </div>
+                        </form>
+                        <form method="post" action="/admin/users/<%= user.id %>/movies/<%= movie.id %>/delete" class="inline-form">
+                            <button type="submit" class="btn btn-delete btn-small" onclick="return confirm('Delete this movie?')">Delete</button>
+                        </form>
+                    </li>
+                <% }) %>
+            </ul>
+        <% } else { %>
+            <div class="empty-state">
+                <p>No movies for this user yet.</p>
+            </div>
+        <% } %>
+    </div>
+    <%- include('../partials/foot.partial.ejs') %>
+</body>
+</html>

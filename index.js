@@ -30,12 +30,27 @@ app.use(
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
+  res.locals.isAdmin = req.session.user ? users.getById(req.session.user.id)?.isAdmin : false;
   next();
 });
 
 function requireAuth(req, res, next) {
   if (!req.session.user) {
     res.redirect("/login");
+    return;
+  }
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.session.user) {
+    res.redirect("/login");
+    return;
+  }
+  const user = users.getById(req.session.user.id);
+  if (!user?.isAdmin) {
+    res.status(403);
+    res.send("Access denied. Admin only.");
     return;
   }
   next();
@@ -161,7 +176,12 @@ app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
   const errors = movies.validateMovieData(movie_data);
   if (errors.length === 0) {
     const updated = movies.update(movie_id, movie_data, req.session.user.id);
-    res.redirect(`/movies/${updated.id}`);
+    console.log("updated movie:", updated);
+    if (updated && updated.id) {
+      res.redirect(`/movies/${updated.id}`);
+    } else {
+      res.redirect("/movies");
+    }
   } else {
     res.status(400);
     res.render("edit_movie", {
@@ -241,6 +261,7 @@ app.get("/login", (req, res) => {
 
 // Handle login
 app.post("/login", async (req, res) => {
+  console.log("Login attempt:", req.body);
   if (req.session.user) {
     res.redirect("/movies");
     return;
@@ -262,7 +283,9 @@ app.post("/login", async (req, res) => {
   req.session.user = {
     id: user.id,
     username: user.username,
+    isAdmin: user.isAdmin,
   };
+  console.log("Login success:", user.username);
   res.redirect("/movies");
 });
 
@@ -272,6 +295,125 @@ app.get("/logout", (req, res) => {
   });
 });
 
-app.listen(port, () => {
+app.get("/admin", requireAdmin, (req, res) => {
+  const allUsers = users.getAll();
+  const usersWithMovieCount = allUsers.map(user => ({
+    ...user,
+    movieCount: users.getUserMovieCount(user.id),
+  }));
+  res.render("admin/dashboard", {
+    title: "Admin Dashboard",
+    users: usersWithMovieCount,
+  });
+});
+
+app.get("/admin/users/:user_id/edit", requireAdmin, (req, res) => {
+  const userId = parseInt(req.params.user_id, 10);
+  const user = users.getById(userId);
+  if (!user) {
+    res.sendStatus(404);
+    return;
+  }
+  res.render("admin/edit_user", {
+    title: `Edit User - ${user.username}`,
+    editUser: user,
+    error: null,
+  });
+});
+
+app.post("/admin/users/:user_id/edit", requireAdmin, async (req, res) => {
+  const userId = parseInt(req.params.user_id, 10);
+  const result = await users.updateUser(userId, {
+    username: req.body.username,
+    password: req.body.password || undefined,
+  });
+
+  if (result.error) {
+    const user = users.getById(userId);
+    res.render("admin/edit_user", {
+      title: `Edit User - ${user.username}`,
+      editUser: { ...user, username: req.body.username },
+      error: result.error,
+    });
+    return;
+  }
+
+  res.redirect("/admin");
+});
+
+app.get("/admin/users/:user_id/movies", requireAdmin, (req, res) => {
+  const userId = parseInt(req.params.user_id, 10);
+  const user = users.getById(userId);
+  if (!user) {
+    res.sendStatus(404);
+    return;
+  }
+  const userMovies = movies.getAllForUser(userId);
+  const allMovies = userMovies.filter(m => m.userId === userId);
+  res.render("admin/user_movies", {
+    title: `${user.username}'s Movies`,
+    user: user,
+    movies: allMovies,
+    errors: [],
+  });
+});
+
+app.post("/admin/users/:user_id/movies/:movie_id/edit", requireAdmin, (req, res) => {
+  const userId = parseInt(req.params.user_id, 10);
+  const movieId = parseInt(req.params.movie_id, 10);
+  const movie = movies.getById(movieId);
+  
+  if (!movie || movie.userId !== userId) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const movie_data = {
+    title: req.body.title,
+    director: req.body.director,
+    year:
+      req.body.year !== undefined && req.body.year !== ""
+        ? parseInt(req.body.year, 10)
+        : undefined,
+    genre: req.body.genre || undefined,
+    rating:
+      req.body.rating !== undefined && req.body.rating !== ""
+        ? parseFloat(req.body.rating)
+        : undefined,
+  };
+
+  const errors = movies.validateMovieData(movie_data);
+  if (errors.length === 0) {
+    movies.update(movieId, movie_data, userId);
+    res.redirect(`/admin/users/${userId}/movies`);
+  } else {
+    const user = users.getById(userId);
+    const userMovies = movies.getAllForUser(userId);
+    const allMovies = userMovies.filter(m => m.userId === userId);
+    res.render("admin/user_movies", {
+      title: `${user.username}'s Movies`,
+      user: user,
+      movies: allMovies,
+      errors,
+    });
+  }
+});
+
+app.post("/admin/users/:user_id/movies/:movie_id/delete", requireAdmin, (req, res) => {
+  const userId = parseInt(req.params.user_id, 10);
+  const movieId = parseInt(req.params.movie_id, 10);
+  const movie = movies.getById(movieId);
+  
+  if (!movie || (movie.userId !== null && movie.userId !== userId)) {
+    res.sendStatus(404);
+    return;
+  }
+
+  movies.delete(movieId, req.session.user.id, true);
+  res.redirect(`/admin/users/${userId}/movies`);
+});
+
+app.listen(port, async () => {
+  await users.createAdminUser();
   console.log(`Server listening on http://localhost:${port}`);
 });

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head.partial.ejs') %>
+    <title><%= title %></title>
+</head>
+<body>
+    <div class="container">
+        <h1><%= title %></h1>
+        
+        <% if (error) { %>
+            <ul id="errors">
+                <li><%= error %></li>
+            </ul>
+        <% } %>
+
+        <form method="post" action="/admin/users/<%= editUser.id %>/edit">
+            <div>
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="<%= editUser.username %>" required>
+            </div>
+
+            <div>
+                <label for="password">New Password (leave blank to keep current):</label>
+                <input type="password" id="password" name="password" placeholder="Enter new password">
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="/admin" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    <%- include('../partials/foot.partial.ejs') %>
+</body>
+</html>
