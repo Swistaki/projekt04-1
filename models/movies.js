@@ -62,7 +62,7 @@ export function add(movie_data, userId) {
   return getById(lastId.id);
 }
 
-export function getAll() {
+function getAll() {
   return db_ops.get_all_movies.all().map(parseMovie);
 }
 
@@ -79,9 +79,7 @@ export function getById(id_param) {
 }
 
 export function update(id_param, movie_data, userId) {
-  console.log("update called:", { id_param, movie_data, userId });
   const movie = getById(id_param);
-  console.log("movie found:", movie);
   if (!movie) return null;
 
   if (movie.userId === null) {
@@ -94,16 +92,11 @@ export function update(id_param, movie_data, userId) {
       userId
     );
     const lastId = db_ops.get_last_insert_id.get();
-    console.log("lastId result:", JSON.stringify(lastId));
-    console.log("lastId.id:", lastId && lastId.id);
     const newId = lastId && lastId.id;
     if (!newId) {
-      console.log("ERROR: Could not get new movie id");
       return null;
     }
-    const updated = getById(newId);
-    console.log("updated:", updated);
-    return updated;
+    return getById(newId);
   } else if (movie.userId !== userId) {
     return null;
   } else {
@@ -116,7 +109,6 @@ export function update(id_param, movie_data, userId) {
       movie.userId,
       id_param
     );
-    console.log("update result:", result);
     return result ? parseMovie(result) : null;
   }
 }
@@ -170,16 +162,14 @@ export function validateMovieData(movie) {
   return errors;
 }
 
-export { sample_categories };
+
 
 export default {
   add,
-  getAll,
   getAllForUser,
   getById,
   update,
   delete: deleteMovie,
   validateMovieData,
   seedData,
-  sample_categories,
 };

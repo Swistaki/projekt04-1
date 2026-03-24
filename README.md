@@ -19,4 +19,5 @@ Prosta aplikacja Express do przechowywania filmów w bazie SQLite.
 2. Otwórz w przeglądarce:
    http://localhost:8000/
 
-
+## Konto administratora 
+- Aby wejść na konto administratora należy zalogować się loginem "admin" oraz hasłem "admin".

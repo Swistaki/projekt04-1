@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import morgan from "morgan";
+
 import session from "express-session";
 import movies from "./models/movies.js";
 import users from "./models/users.js";
@@ -16,7 +16,7 @@ app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan("dev"));
+
 app.use(
   session({
     secret: "movie-app-secret-key-change-in-production",
@@ -56,18 +56,15 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Main page - redirect to movies
 app.get("/", (req, res) => {
   res.redirect("/movies");
 });
 
-// Seed test data
 app.get("/movies/seed", requireAuth, (req, res) => {
   movies.seedData();
   res.redirect("/movies");
 });
 
-// List all movies
 app.get("/movies", requireAuth, (req, res) => {
   let allMovies = movies.getAllForUser(req.session.user.id);
   const user = users.getById(req.session.user.id);
@@ -82,7 +79,6 @@ app.get("/movies", requireAuth, (req, res) => {
   });
 });
 
-// Show new movie form (MUST come before /:movie_id route)
 app.get("/movies/new", requireAuth, (req, res) => {
   res.render("new_movie", {
     title: "Add New Movie",
@@ -91,7 +87,6 @@ app.get("/movies/new", requireAuth, (req, res) => {
   });
 });
 
-// Show single movie
 app.get("/movies/:movie_id", requireAuth, (req, res) => {
   const movie = movies.getById(parseInt(req.params.movie_id, 10));
   if (movie && (movie.userId === null || movie.userId === req.session.user.id)) {
@@ -105,7 +100,6 @@ app.get("/movies/:movie_id", requireAuth, (req, res) => {
   }
 });
 
-// Add new movie
 app.post("/movies", requireAuth, (req, res) => {
   const movie_data = {
     title: req.body.title,
@@ -135,7 +129,6 @@ app.post("/movies", requireAuth, (req, res) => {
   }
 });
 
-// Show edit movie form
 app.get("/movies/:movie_id/edit", requireAuth, (req, res) => {
   const movie_id = parseInt(req.params.movie_id, 10);
   const movie = movies.getById(movie_id);
@@ -150,7 +143,6 @@ app.get("/movies/:movie_id/edit", requireAuth, (req, res) => {
   });
 });
 
-// Update movie
 app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
   const movie_id = parseInt(req.params.movie_id, 10);
   const movie = movies.getById(movie_id);
@@ -176,7 +168,7 @@ app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
   const errors = movies.validateMovieData(movie_data);
   if (errors.length === 0) {
     const updated = movies.update(movie_id, movie_data, req.session.user.id);
-    console.log("updated movie:", updated);
+
     if (updated && updated.id) {
       res.redirect(`/movies/${updated.id}`);
     } else {
@@ -192,7 +184,6 @@ app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
   }
 });
 
-// Delete movie
 app.post("/movies/:movie_id/delete", requireAuth, (req, res) => {
   const movie_id = parseInt(req.params.movie_id, 10);
   const movie = movies.getById(movie_id);
@@ -208,7 +199,6 @@ app.post("/movies/:movie_id/delete", requireAuth, (req, res) => {
   }
 });
 
-// Show register form
 app.get("/register", (req, res) => {
   if (req.session.user) {
     res.redirect("/movies");
@@ -220,7 +210,6 @@ app.get("/register", (req, res) => {
   });
 });
 
-// Handle registration
 app.post("/register", async (req, res) => {
   if (req.session.user) {
     res.redirect("/movies");
@@ -247,7 +236,6 @@ app.post("/register", async (req, res) => {
   res.redirect("/movies");
 });
 
-// Show login form
 app.get("/login", (req, res) => {
   if (req.session.user) {
     res.redirect("/movies");
@@ -259,9 +247,7 @@ app.get("/login", (req, res) => {
   });
 });
 
-// Handle login
 app.post("/login", async (req, res) => {
-  console.log("Login attempt:", req.body);
   if (req.session.user) {
     res.redirect("/movies");
     return;
@@ -285,7 +271,6 @@ app.post("/login", async (req, res) => {
     username: user.username,
     isAdmin: user.isAdmin,
   };
-  console.log("Login success:", user.username);
   res.redirect("/movies");
 });
 
