@@ -17,9 +17,14 @@ app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.urlencoded({ extended: true }));
 
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  console.warn("WARNING: SESSION_SECRET environment variable not set. Using insecure default.");
+}
+
 app.use(
   session({
-    secret: "movie-app-secret-key-change-in-production",
+    secret: sessionSecret || "movie-app-secret-key-change-in-production",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -30,7 +35,9 @@ app.use(
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;
-  res.locals.isAdmin = req.session.user ? users.getById(req.session.user.id)?.isAdmin : false;
+  const dbUser = req.session.user ? users.getById(req.session.user.id) : null;
+  res.locals.isAdmin = dbUser?.isAdmin ?? false;
+  req.session.user = req.session.user ? { ...req.session.user, isAdmin: dbUser?.isAdmin ?? false } : null;
   next();
 });
 
@@ -66,11 +73,12 @@ app.get("/movies/seed", requireAuth, (req, res) => {
 });
 
 app.get("/movies", requireAuth, (req, res) => {
-  let allMovies = movies.getAllForUser(req.session.user.id);
+  const isAdmin = req.session.user?.isAdmin ?? false;
+  let allMovies = movies.getAllForUser(req.session.user.id, isAdmin);
   const user = users.getById(req.session.user.id);
   if (!user?.hasSeenSampleMovies && allMovies.length === 0) {
     movies.seedData();
-    allMovies = movies.getAllForUser(req.session.user.id);
+    allMovies = movies.getAllForUser(req.session.user.id, isAdmin);
     users.markSeenSampleMovies(req.session.user.id);
   }
   res.render("movies", {
@@ -89,7 +97,8 @@ app.get("/movies/new", requireAuth, (req, res) => {
 
 app.get("/movies/:movie_id", requireAuth, (req, res) => {
   const movie = movies.getById(parseInt(req.params.movie_id, 10));
-  if (movie && (movie.userId === null || movie.userId === req.session.user.id)) {
+  const isAdmin = req.session.user?.isAdmin ?? false;
+  if (movie && (isAdmin || movie.userId === null || movie.userId === req.session.user.id)) {
     res.render("movie", {
       title: movie.title,
       movie,
@@ -132,7 +141,8 @@ app.post("/movies", requireAuth, (req, res) => {
 app.get("/movies/:movie_id/edit", requireAuth, (req, res) => {
   const movie_id = parseInt(req.params.movie_id, 10);
   const movie = movies.getById(movie_id);
-  if (!movie || (movie.userId !== null && movie.userId !== req.session.user.id)) {
+  const isAdmin = req.session.user?.isAdmin ?? false;
+  if (!movie || (!isAdmin && movie.userId !== null && movie.userId !== req.session.user.id)) {
     res.sendStatus(404);
     return;
   }
@@ -146,7 +156,8 @@ app.get("/movies/:movie_id/edit", requireAuth, (req, res) => {
 app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
   const movie_id = parseInt(req.params.movie_id, 10);
   const movie = movies.getById(movie_id);
-  if (!movie || (movie.userId !== null && movie.userId !== req.session.user.id)) {
+  const isAdmin = req.session.user?.isAdmin ?? false;
+  if (!movie || (!isAdmin && movie.userId !== null && movie.userId !== req.session.user.id)) {
     res.sendStatus(404);
     return;
   }
@@ -167,7 +178,7 @@ app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
 
   const errors = movies.validateMovieData(movie_data);
   if (errors.length === 0) {
-    const updated = movies.update(movie_id, movie_data, req.session.user.id);
+    const updated = movies.update(movie_id, movie_data, req.session.user.id, isAdmin);
 
     if (updated && updated.id) {
       res.redirect(`/movies/${updated.id}`);
@@ -187,11 +198,12 @@ app.post("/movies/:movie_id/edit", requireAuth, (req, res) => {
 app.post("/movies/:movie_id/delete", requireAuth, (req, res) => {
   const movie_id = parseInt(req.params.movie_id, 10);
   const movie = movies.getById(movie_id);
-  if (!movie || (movie.userId !== null && movie.userId !== req.session.user.id)) {
+  const isAdmin = req.session.user?.isAdmin ?? false;
+  if (!movie || (!isAdmin && movie.userId !== null && movie.userId !== req.session.user.id)) {
     res.sendStatus(404);
     return;
   }
-  const success = movies.delete(movie_id, req.session.user.id);
+  const success = movies.delete(movie_id, req.session.user.id, isAdmin);
   if (success) {
     res.redirect("/movies");
   } else {
@@ -213,6 +225,14 @@ app.get("/register", (req, res) => {
 app.post("/register", async (req, res) => {
   if (req.session.user) {
     res.redirect("/movies");
+    return;
+  }
+
+  if (req.body.password !== req.body.confirm_password) {
+    res.render("register", {
+      title: "Register",
+      error: "Passwords do not match",
+    });
     return;
   }
 
@@ -333,7 +353,7 @@ app.get("/admin/users/:user_id/movies", requireAdmin, (req, res) => {
     res.sendStatus(404);
     return;
   }
-  const userMovies = movies.getAllForUser(userId);
+  const userMovies = movies.getAllForUser(userId, true);
   const allMovies = userMovies.filter(m => m.userId === userId);
   res.render("admin/user_movies", {
     title: `${user.username}'s Movies`,
@@ -369,11 +389,11 @@ app.post("/admin/users/:user_id/movies/:movie_id/edit", requireAdmin, (req, res)
 
   const errors = movies.validateMovieData(movie_data);
   if (errors.length === 0) {
-    movies.update(movieId, movie_data, userId);
+    movies.update(movieId, movie_data, userId, true);
     res.redirect(`/admin/users/${userId}/movies`);
   } else {
     const user = users.getById(userId);
-    const userMovies = movies.getAllForUser(userId);
+    const userMovies = movies.getAllForUser(userId, true);
     const allMovies = userMovies.filter(m => m.userId === userId);
     res.render("admin/user_movies", {
       title: `${user.username}'s Movies`,

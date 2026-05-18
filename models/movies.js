@@ -66,11 +66,16 @@ function getAll() {
   return db_ops.get_all_movies.all().map(parseMovie);
 }
 
-export function getAllForUser(userId) {
-  return db_ops.get_movies_for_user
+export function getAllForUser(userId, isAdmin = false) {
+  const movies = db_ops.get_movies_for_user
     .all(userId)
-    .map(parseMovie)
-    .filter(m => !m.hiddenFor || !m.hiddenFor.includes(userId));
+    .map(parseMovie);
+
+  if (isAdmin) {
+    return movies;
+  }
+
+  return movies.filter(m => !m.hiddenFor || !m.hiddenFor.includes(userId));
 }
 
 export function getById(id_param) {
@@ -78,7 +83,7 @@ export function getById(id_param) {
   return row ? parseMovie(row) : null;
 }
 
-export function update(id_param, movie_data, userId) {
+export function update(id_param, movie_data, userId, isAdmin = false) {
   const movie = getById(id_param);
   if (!movie) return null;
 
@@ -97,7 +102,7 @@ export function update(id_param, movie_data, userId) {
       return null;
     }
     return getById(newId);
-  } else if (movie.userId !== userId) {
+  } else if (!isAdmin && movie.userId !== userId) {
     return null;
   } else {
     const result = db_ops.update_movie.run(
@@ -118,11 +123,15 @@ export function deleteMovie(id_param, userId, isAdmin = false) {
   if (!movie) return false;
 
   if (movie.userId === null) {
-    const hiddenFor = movie.hiddenFor || [];
-    if (!hiddenFor.includes(userId)) {
-      hiddenFor.push(userId);
+    if (isAdmin) {
+      db_ops.delete_movie.run(id_param);
+    } else {
+      const hiddenFor = movie.hiddenFor || [];
+      if (!hiddenFor.includes(userId)) {
+        hiddenFor.push(userId);
+      }
+      db_ops.update_movie_hidden.run(JSON.stringify(hiddenFor), id_param);
     }
-    db_ops.update_movie_hidden.run(JSON.stringify(hiddenFor), id_param);
   } else if (!isAdmin && movie.userId !== userId) {
     return false;
   } else {

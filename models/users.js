@@ -1,7 +1,5 @@
-import bcrypt from "bcryptjs";
+import argon2 from "argon2";
 import db_ops, { db } from "./database.js";
-
-const SALT_ROUNDS = 10;
 
 function parseUser(row) {
   return {
@@ -49,7 +47,7 @@ async function create(userData) {
     return { error: "Username already exists" };
   }
 
-  const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+  const hashedPassword = await argon2.hash(password);
 
   const result = db_ops.insert_user.run(username, hashedPassword, new Date().toISOString());
   return { user: parseUser(result) };
@@ -61,7 +59,7 @@ async function validatePassword(username, password) {
     return null;
   }
 
-  const isValid = await bcrypt.compare(password, user.password);
+  const isValid = await argon2.verify(user.password, password);
   return isValid ? user : null;
 }
 
@@ -93,7 +91,7 @@ async function updateUser(id, userData) {
 
   let result;
   if (password) {
-    const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
+    const hashedPassword = await argon2.hash(password);
     result = db_ops.update_user.run(username, hashedPassword, id);
   } else {
     result = db_ops.update_user_no_password.run(username, id);
@@ -113,7 +111,7 @@ async function createAdminUser() {
     return { user: existingAdmin };
   }
 
-  const hashedPassword = await bcrypt.hash("admin", SALT_ROUNDS);
+  const hashedPassword = await argon2.hash("admin");
   const stmt = db.prepare(`
     INSERT INTO users (username, password, createdAt, hasSeenSampleMovies, isAdmin)
     VALUES (?, ?, ?, 1, 1)
